@@ -42,7 +42,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 def get_args_parser():
     parser = argparse.ArgumentParser('CrossViT training and evaluation script', add_help=False)
     parser.add_argument('--batch-size', default=64, type=int)
-    parser.add_argument('--epochs', default=10, type=int)
+    parser.add_argument('--epochs', default=3, type=int)
 
     # Model parameters
     parser.add_argument('--model', default='crossvit_15_224', type=str, metavar='MODEL',

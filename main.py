@@ -1,9 +1,6 @@
 # Copyright IBM All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
-import os
-os.system('pip install submitit')
-os.system('pip install fvcore')
-os.system('pip install einops')
+
 """
 Main training and evaluation script
 
@@ -35,14 +32,13 @@ from samplers import RASampler
 import models
 import utils
 
-
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
 def get_args_parser():
     parser = argparse.ArgumentParser('CrossViT training and evaluation script', add_help=False)
-    parser.add_argument('--batch-size', default=64, type=int)
-    parser.add_argument('--epochs', default=3, type=int)
+    parser.add_argument('--batch-size', default=48, type=int)
+    parser.add_argument('--epochs', default=300, type=int)
 
     # Model parameters
     parser.add_argument('--model', default='crossvit_15_224', type=str, metavar='MODEL',
@@ -110,7 +106,7 @@ def get_args_parser():
     parser.add_argument('--repeated-aug', action='store_true')
     parser.add_argument('--no-repeated-aug', action='store_false', dest='repeated_aug')
     parser.set_defaults(repeated_aug=True)
-    parser.add_argument('--crop-ratio', type=float, default=256/224, help='crop ratio for evaluation')
+    parser.add_argument('--crop-ratio', type=float, default=256 / 224, help='crop ratio for evaluation')
 
     # * Random Erase params
     parser.add_argument('--reprob', type=float, default=0.25, metavar='PCT',
@@ -137,7 +133,8 @@ def get_args_parser():
                         help='How to apply mixup/cutmix params. Per "batch", "pair", or "elem"')
 
     # Dataset parameters
-    parser.add_argument('--data-path', default=os.path.join(os.path.expanduser("~"), 'datasets/image_cls/imagenet1k/'), type=str,
+    parser.add_argument('--data-path',
+                        default=os.path.join(os.path.expanduser("~"), '/home/xusheng/oldmindcv/imagenet/'), type=str,
                         help='dataset path')
     parser.add_argument('--data-set', default='IMNET', choices=['CIFAR10', 'CIFAR100', 'IMNET', 'INAT', 'INAT19'],
                         type=str, help='Image Net dataset path')
@@ -214,7 +211,8 @@ def main(args):
     )
 
     dataset_val, _ = build_dataset(is_train=False, args=args)
-    val_sampler = torch.utils.data.DistributedSampler(dataset_val, num_replicas=num_tasks, rank=global_rank, shuffle=False)
+    val_sampler = torch.utils.data.DistributedSampler(dataset_val, num_replicas=num_tasks, rank=global_rank,
+                                                      shuffle=False)
     data_loader_val = torch.utils.data.DataLoader(
         dataset_val, sampler=val_sampler, batch_size=int(1.5 * args.batch_size),
         shuffle=False, num_workers=args.num_workers,
@@ -253,7 +251,7 @@ def main(args):
     if args.distributed:
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
         model_without_ddp = model.module
-    #optimizer = create_optimizer(args, model)
+    # optimizer = create_optimizer(args, model)
 
     loss_scaler = NativeScaler()
     lr_scheduler, _ = create_scheduler(args, optimizer)
@@ -305,7 +303,8 @@ def main(args):
     print(f"Start training, currnet max acc is {max_accuracy:.2f}")
     start_time = time.time()
     for epoch in range(args.start_epoch, args.epochs):
-
+        print("epoch")
+        print(epoch)
         if args.distributed:
             data_loader_train.sampler.set_epoch(epoch)
 
@@ -348,6 +347,7 @@ def main(args):
         if args.output_dir and utils.is_main_process():
             with (output_dir / "log.txt").open("a") as f:
                 f.write(json.dumps(log_stats) + "\n")
+        print(log_stats)
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))

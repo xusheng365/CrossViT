@@ -3,7 +3,7 @@
 import os
 os.system('pip install submitit')
 os.system('pip install fvcore')
-os.system('pip install einops -i https://pypi.tuna.tsinghua.edu.cn/simple some-package')
+os.system('pip install einops')
 """
 Main training and evaluation script
 
@@ -34,7 +34,6 @@ from engine import train_one_epoch, evaluate
 from samplers import RASampler
 import models
 import utils
-
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -137,7 +136,7 @@ def get_args_parser():
                         help='How to apply mixup/cutmix params. Per "batch", "pair", or "elem"')
 
     # Dataset parameters
-    parser.add_argument('--data-path', default=os.path.join(os.path.expanduser("~"), 'datasets/image_cls/imagenet1k/'), type=str,
+    parser.add_argument('--data-path', default=os.path.join(os.path.expanduser("~"), '/dataset/imagenet'), type=str,
                         help='dataset path')
     parser.add_argument('--data-set', default='IMNET', choices=['CIFAR10', 'CIFAR100', 'IMNET', 'INAT', 'INAT19'],
                         type=str, help='Image Net dataset path')

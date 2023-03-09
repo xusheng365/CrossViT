@@ -1,6 +1,9 @@
 # Copyright IBM All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
-
+import os
+os.system('pip install submitit')
+os.system('pip install fvcore')
+os.system('pip install einops')
 """
 Main training and evaluation script
 
@@ -39,10 +42,10 @@ warnings.filterwarnings("ignore", category=UserWarning)
 def get_args_parser():
     parser = argparse.ArgumentParser('CrossViT training and evaluation script', add_help=False)
     parser.add_argument('--batch-size', default=64, type=int)
-    parser.add_argument('--epochs', default=300, type=int)
+    parser.add_argument('--epochs', default=10, type=int)
 
     # Model parameters
-    parser.add_argument('--model', default='crossvit_small_224', type=str, metavar='MODEL',
+    parser.add_argument('--model', default='crossvit_15_224', type=str, metavar='MODEL',
                         help='Name of model to train')
     parser.add_argument('--input-size', default=240, type=int, help='images input size')
 
@@ -295,7 +298,7 @@ def main(args):
             max_accuracy = checkpoint['max_accuracy']
 
     if args.eval:
-        test_stats = evaluate(data_loader_val, model, device, num_tasks, distributed=True, amp=args.amp)
+        test_stats = evaluate(data_loader_val, model, device, num_tasks, distributed=False, amp=args.amp)
         print(f"Accuracy of the network on the {len(dataset_val)} test images: {test_stats['acc1']:.2f}%")
         return
 
@@ -316,7 +319,7 @@ def main(args):
 
         lr_scheduler.step(epoch)
 
-        test_stats = evaluate(data_loader_val, model, device, num_tasks, distributed=True, amp=args.amp)
+        test_stats = evaluate(data_loader_val, model, device, num_tasks, distributed=False, amp=args.amp)
         print(f"Accuracy of the network on the {len(dataset_val)} test images: {test_stats['acc1']:.2f}%")
         max_accuracy = max(max_accuracy, test_stats["acc1"])
         print(f'Max accuracy: {max_accuracy:.2f}%')
